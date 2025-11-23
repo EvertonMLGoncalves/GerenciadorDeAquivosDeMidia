@@ -63,4 +63,8 @@ public abstract class Midia {
                 "\nDuração: " + duracao +
                 "\nCategoria: " + categoria;
     }
+
+    public String getFormato() {
+        return "";
+    }
 }

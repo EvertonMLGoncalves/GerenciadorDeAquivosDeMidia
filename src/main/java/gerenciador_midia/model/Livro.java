@@ -1,7 +1,6 @@
 package gerenciador_midia.model;
 
-public abstract class Livro extends Midia{
-
+public class Livro extends Midia{
     private String Livro;
 
     public Livro(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String livro) {

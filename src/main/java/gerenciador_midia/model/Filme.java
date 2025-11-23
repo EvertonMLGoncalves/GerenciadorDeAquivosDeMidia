@@ -3,7 +3,6 @@ package gerenciador_midia.model;
 import java.sql.SQLOutput;
 
 public class Filme extends Midia{
-
     private String filme;
 
     public Filme(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String filme) {
