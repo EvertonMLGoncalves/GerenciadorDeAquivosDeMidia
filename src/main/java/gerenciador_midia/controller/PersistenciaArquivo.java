@@ -1,30 +1,79 @@
 package gerenciador_midia.controller;
 
+import gerenciador_midia.model.Midia;
 import java.io.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PersistenciaArquivo {
 
     private Path pasta;
-    File f = new File("arquivo.txt");
 
     public PersistenciaArquivo(Path pasta) {
         this.pasta = pasta;
+        criarPastaSeNaoExistir();
     }
 
-    public void salvarMidia(Path midia) throws IOException {
-        FileOutputStream fos = new FileOutputStream("arquivo.txt");
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(midia);
-            oos.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Arquivo não encontrado.");
-        }catch (IOException e){
-            System.out.println("Erro ao salvar o arquivo.");
+    private void criarPastaSeNaoExistir() {
+        File diretorio = pasta.toFile();
+        if (!diretorio.exists()) {
+            diretorio.mkdirs();
+        }
+    }
+
+    public void salvarMidia(Midia midia) throws IOException {
+        List<Midia> midias = carregarTodasMidias();
+
+        boolean encontrado = false;
+        for (int i = 0; i < midias.size(); i++) {
+            if (midias.get(i).getLocal().equals(midia.getLocal())) {
+                midias.set(i, midia);
+                encontrado = true;
+                break;
+            }
         }
 
+        if (!encontrado) {
+            midias.add(midia);
+        }
 
+        salvarTodasMidias(midias);
+    }
+
+    private void salvarTodasMidias(List<Midia> midias) throws IOException {
+        File arquivo = pasta.resolve("midias.dat").toFile();
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(arquivo))) {
+            oos.writeObject(midias);
+            System.out.println("Mídias salvas com sucesso!");
+        }
+    }
+
+    public List<Midia> carregarTodasMidias() {
+        List<Midia> midias = new ArrayList<>();
+        File arquivo = pasta.resolve("midias.dat").toFile();
+
+        if (!arquivo.exists()) {
+            return midias;
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new FileInputStream(arquivo))) {
+            midias = (List<Midia>) ois.readObject();
+        } catch (FileNotFoundException e) {
+            System.out.println("Arquivo não encontrado.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Erro ao carregar mídias: " + e.getMessage());
+        }
+
+        return midias;
+    }
+
+    public void deletarMidia(Midia midia) throws IOException {
+        List<Midia> midias = carregarTodasMidias();
+        midias.removeIf(m -> m.getLocal().equals(midia.getLocal()));
+        salvarTodasMidias(midias);
     }
 }
-

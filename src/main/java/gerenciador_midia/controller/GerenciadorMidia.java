@@ -20,6 +20,47 @@ public class GerenciadorMidia {
         carregarMidias();
     }
 
+    public void incluirMidia(Midia midia) {
+        this.midias.add(midia);
+        carregarMidias();
+    }
+
+    public void editarMidia(Midia midiaAntiga, Midia midiaNova) {
+        for (int i = 0; i < midias.size(); i++) {
+            if (midias.get(i).getLocal().equals(midiaAntiga.getLocal())) {
+                midias.set(i, midiaNova);
+                break;
+            }
+        }
+    }
+    public void renomearMidia(String local, String novoTitulo) {
+        for (Midia m : midias) {
+            if (m.getLocal().equals(local)) {
+                m.setTitulo(novoTitulo);
+                break;
+            }
+        }
+    }
+    public void moverMidia(String localAntigo, String localNovo) {
+        for (Midia m : midias) {
+            if (m.getLocal().equals(localAntigo)) {
+                m.setLocal(localNovo);
+                break;
+            }
+        }
+    }
+    public void renomearArquivo(String localantigo, String novoTitulo) {
+        File arquivoAntigo = new File (localantigo);
+        File arquivoNovo = new File(novoTitulo);
+
+        for (Midia m : midias) {
+            if (m.getLocal().equals(localantigo)) {
+                m.setTitulo(novoTitulo);
+                break;
+            }
+        }
+    }
+
     public List<Midia> listarPorCategoria(String categoria) {
         if (categoria == null) return new ArrayList<>();
 

@@ -3,13 +3,29 @@ package gerenciador_midia.model;
 import java.sql.SQLOutput;
 
 public class Filme extends Midia{
-    private String filme;
 
-    public Filme(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String filme) {
+    private String idioma;
+
+    public String getIdioma() {
+        return idioma;
+    }
+
+    public void setIdioma(String idioma) {
+        this.idioma = idioma;
+    }
+
+    public Filme(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String idioma) {
         super(local, tamanhoEmDisco, titulo, duracao, categoria);
-        this.filme = filme;
+        this.idioma = idioma;
     }
-    public void mostrarDetalhesFilme(){
-        System.out.println("Detalhes do filme: " + exibirDetalhes());
-    }
+
+    @Override
+    public String exibirDetalhes() {
+    return "Filme: " + getTitulo() +
+            "\nIdioma: " + idioma +
+            "\nDuração: " + getDuracao() + " Minutos" +
+            "\nCategoria: " + getCategoria() +
+            "\nTamanho: " + getTamanhoEmDisco() + " MB" +
+            "\nLocal: " + getLocal();
+}
 }
