@@ -3,18 +3,9 @@ package gerenciador_midia.model;
 public class Livro extends Midia {
     private String autores;
 
-    public String getAutores() {
-
-        return autores;
-    }
-
-    public void setAutores(String autores) {
-        this.autores = autores;
-    }
-
     public Livro(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String autores) {
         super(local, tamanhoEmDisco, titulo, duracao, categoria);
-        this.autores = autores;
+        this.setAutores(autores);
     }
 
     @Override
@@ -25,5 +16,14 @@ public class Livro extends Midia {
                 "\nCategoria: " + getCategoria() +
                 "\nTamanho: " + getTamanhoEmDisco() + " MB" +
                 "\nLocal: " + getLocal();
+    }
+
+    public String getAutores() {
+
+        return autores;
+    }
+
+    public void setAutores(String autores) {
+        this.autores = autores;
     }
 }

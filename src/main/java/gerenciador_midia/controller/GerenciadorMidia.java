@@ -1,14 +1,22 @@
 package gerenciador_midia.controller;
 
-import gerenciador_midia.model.Midia;
 import gerenciador_midia.model.Filme;
 import gerenciador_midia.model.Livro;
+import gerenciador_midia.model.Midia;
 import gerenciador_midia.model.Musica;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class GerenciadorMidia {
 

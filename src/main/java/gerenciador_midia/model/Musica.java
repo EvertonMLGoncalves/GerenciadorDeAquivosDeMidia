@@ -5,7 +5,7 @@ public class Musica extends Midia {
 
     public Musica(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String artista) {
         super(local, tamanhoEmDisco, titulo, duracao, categoria);
-        this.artista = artista;
+        this.setArtista(artista);
     }
 
     public String getArtista() {

@@ -10,6 +10,22 @@ public abstract class Midia  implements Serializable {
     protected int duracao;
     protected String categoria;
 
+    public Midia(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria) {
+        this.setLocal(local);
+        this.setTamanhoEmDisco(tamanhoEmDisco);
+        this.setTitulo(titulo);
+        this.setDuracao(duracao);
+        this.setCategoria(categoria);
+    }
+
+    public String exibirDetalhes() {
+        return "Título: " + titulo +
+                "\nLocal: " + local +
+                "\nTamanho em disco: " + tamanhoEmDisco +
+                "\nDuração: " + duracao +
+                "\nCategoria: " + categoria;
+    }
+
     public String getLocal() {
         return local;
     }
@@ -48,22 +64,6 @@ public abstract class Midia  implements Serializable {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
-    }
-
-    public Midia(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria) {
-        this.local = local;
-        this.tamanhoEmDisco = tamanhoEmDisco;
-        this.titulo = titulo;
-        this.duracao = duracao;
-        this.categoria = categoria;
-    }
-
-    public String exibirDetalhes() {
-        return "Título: " + titulo +
-                "\nLocal: " + local +
-                "\nTamanho em disco: " + tamanhoEmDisco +
-                "\nDuração: " + duracao +
-                "\nCategoria: " + categoria;
     }
 
     public String getFormato() {
