@@ -31,6 +31,7 @@ public class DialogoMidia extends JDialog {
     private Midia midiaResultado;
     private boolean confirmado = false;
     private String tipoMidiaDetectado = null;
+    private Midia midiaOriginal = null;
     
     public DialogoMidia(Frame parent) {
         this(parent, null);
@@ -38,6 +39,8 @@ public class DialogoMidia extends JDialog {
     
     public DialogoMidia(Frame parent, Midia midiaExistente) {
         super(parent, midiaExistente == null ? "Adicionar Mídia" : "Editar Mídia", true);
+        
+        this.midiaOriginal = midiaExistente;
         
         inicializarComponentes();
         configurarLayout();
@@ -166,6 +169,10 @@ public class DialogoMidia extends JDialog {
                 lblTipoDetectado.setForeground(new Color(0, 100, 0));
                 break;
         }
+        
+        txtDuracao.setEditable(false);
+        txtDuracao.setBackground(new Color(240, 240, 240));
+        
         btnSalvar.setEnabled(true);
     }
     
@@ -285,7 +292,7 @@ public class DialogoMidia extends JDialog {
             }
             
             File arquivo = new File(local);
-            if (!arquivo.exists()) {
+            if (!arquivo.exists() && midiaOriginal == null) {
                 int resposta = JOptionPane.showConfirmDialog(this,
                     "O arquivo não existe no caminho especificado.\nDeseja continuar mesmo assim?",
                     "Arquivo não encontrado",
@@ -350,16 +357,45 @@ public class DialogoMidia extends JDialog {
                 return;
             }
             
-            switch (tipoMidiaDetectado) {
-                case "Filme":
-                    midiaResultado = new Filme(local, titulo, duracao, categoria, campoEspecifico);
-                    break;
-                case "Música":
-                    midiaResultado = new Musica(local, titulo, duracao, categoria, campoEspecifico);
-                    break;
-                case "Livro":
-                    midiaResultado = new Livro(local, titulo, duracao, categoria, campoEspecifico);
-                    break;
+            if (midiaOriginal != null) {
+                midiaOriginal.setTitulo(titulo);
+                midiaOriginal.setDuracao(duracao);
+                midiaOriginal.setCategoria(categoria);
+                
+                if (!titulo.equals(midiaOriginal.getTitulo())) {
+                    File arquivoAtual = new File(local);
+                    String diretorio = arquivoAtual.getParent();
+                    String extensao = "";
+                    String nomeArquivo = arquivoAtual.getName();
+                    int pontoIndex = nomeArquivo.lastIndexOf('.');
+                    if (pontoIndex > 0) {
+                        extensao = nomeArquivo.substring(pontoIndex);
+                    }
+                    String novoLocal = diretorio + File.separator + titulo + extensao;
+                    midiaOriginal.setLocal(novoLocal);
+                }
+                
+                if (midiaOriginal instanceof Filme) {
+                    ((Filme) midiaOriginal).setIdioma(campoEspecifico);
+                } else if (midiaOriginal instanceof Musica) {
+                    ((Musica) midiaOriginal).setArtista(campoEspecifico);
+                } else if (midiaOriginal instanceof Livro) {
+                    ((Livro) midiaOriginal).setAutores(campoEspecifico);
+                }
+                
+                midiaResultado = midiaOriginal;
+            } else {
+                switch (tipoMidiaDetectado) {
+                    case "Filme":
+                        midiaResultado = new Filme(local, titulo, duracao, categoria, campoEspecifico);
+                        break;
+                    case "Música":
+                        midiaResultado = new Musica(local, titulo, duracao, categoria, campoEspecifico);
+                        break;
+                    case "Livro":
+                        midiaResultado = new Livro(local, titulo, duracao, categoria, campoEspecifico);
+                        break;
+                }
             }
             
             confirmado = true;

@@ -12,38 +12,46 @@ Sistema para gerenciar arquivos de mídia (filmes, músicas e livros) com interf
 
 O projeto segue o padrão **MVC (Model-View-Controller)** em três camadas:
 
-- **Model (modelo)**: Classes de mídia (Midia, Filme, Musica, Livro)
-- **Controller (controle)**: GerenciadorMidia
-- **View (visao)**: TelaPrincipal, DialogoMidia
-- **Persistência**: PersistenciaArquivo (arquivos .tpoo)
+- **Model (modelo)**: Classes de mídia (`Midia`, `Filme`, `Musica`, `Livro`)
+- **Controller (controle)**: `GerenciadorMidia`
+- **View (visao)**: `TelaPrincipal`, `DialogoMidia`
+- **Persistência**: `PersistenciaArquivo` (arquivos `.tpoo`)
 
-## 📦 Estrutura de Pacotes
+## 📦 Estrutura de Pacotes (resumida)
 
 ```
-projeto-gerenciador-midia/
+GerenciadorDeArquivosDeMidia/
 ├── src/
-│   └── br/edu/furb/gerenciadormidia/
-│       ├── modelo/
-│       │   ├── Midia.java
-│       │   ├── Filme.java
-│       │   ├── Musica.java
-│       │   └── Livro.java
-│       ├── controle/
-│       │   └── GerenciadorMidia.java
-│       |
-│       ├── visao/
-│       │   ├── TelaPrincipal.java
-│       │   └── DialogoMidia.java
-│       └── Main.java
+│   └── main/
+│       └── java/
+│           └── gerenciador_midia/
+│               ├── model/
+│               │   ├── Midia.java
+│               │   ├── Filme.java
+│               │   ├── Musica.java
+│               │   └── Livro.java
+│               ├── controller/
+│               │   └── GerenciadorMidia.java
+│               ├── enums/
+│               │   ├── FilmeFormatoSuportado.java
+│               │   ├── MusicaFormatoSuportado.java
+│               │   └── LivroFormatoSuportado.java
+│               ├── util/
+│               │   └── MetadadosExtractor.java
+│               ├── view/
+│               │   ├── TelaPrincipal.java
+│               │   └── DialogoMidia.java
+│               └── Main.java
 │
 ├── test/
-│   └── br/edu/furb/gerenciadormidia/
-│       ├── modelo/
-│       ├── controle/
-│       └── persistencia/
+│   └── java/
+│       └── gerenciador_midia/
+│           ├── model/
+│           ├── controller/
+│           └── util/
 │
-└── doc/
-    └── (Javadoc gerado)
+└── docs/
+    └── diagrama-aplicacao.png
 ```
 
 ## ✨ Funcionalidades
@@ -55,16 +63,16 @@ projeto-gerenciador-midia/
 - ✅ Listar por categoria (ação, aventura, rock, etc.)
 - ✅ Ordenar por título ou duração
 - ✅ Combinar filtros (ex: livros de aventura)
-- ✅ Persistência em arquivos .tpoo
+- ✅ Persistência em arquivos `.tpoo`
 - ✅ Carregamento automático ao iniciar
 
 ## 📊 Formatos Suportados
 
 | Mídia   | Extensões Suportadas | Duração em      |
-|---------|---------------------|-----------------|
-| Filme   | MP4, MKV            | Minutos         |
-| Música  | MP3                 | Segundos        |
-| Livro   | PDF, EPUB           | Páginas         |
+|---------|----------------------|-----------------|
+| Filme   | MP4, MKV             | Minutos         |
+| Música  | MP3                  | Segundos        |
+| Livro   | PDF, EPUB            | Páginas         |
 
 ## 🎯 Conceitos de POO Aplicados
 
@@ -74,33 +82,60 @@ projeto-gerenciador-midia/
 
 ## 🛠️ Tecnologias
 
-- Java 17+
+- Java 25 (JDK 25)
+- Maven (build)
 - Swing (Interface Gráfica)
 - JUnit 5 (Testes Unitários)
+- Apache Tika (leitura/metadados)
+- Apache PDFBox (manipulação de PDFs)
 
-## 🚀 Como Executar
+## 🚀 Como Executar (mínimo)
 
 1. Clone o repositório
-2. Abra o projeto em sua IDE (Eclipse, IntelliJ, NetBeans)
-3. Execute a classe `Main.java`
+
+   git clone <URL-do-repositório>
+
+2. Construa com Maven:
+
+   mvn package
+
+3. Execute a aplicação (jar gerado):
+
+   mvn package; java -jar target/GerenciadorDeArquivosDeMidia-1.0-SNAPSHOT.jar
+
+Ou abra o projeto na sua IDE e execute a classe `gerenciador_midia.Main`.
+
+
+## 🖥️ Demonstração de uso da tela:
+
+Aqui vão GIFs mostrando o que dá pra fazer na prática.
+
+### ➕ Adicionar arquivo
+
+![Adicionar Arquivo](docs/20251124-0137-50.7421919.gif)
+
+### 🔎⬆️ Filtrar e ordenar
+![Filtrar e Ordenar](docs/20251124-0140-43.8214198.gif)
+
+### ℹ️ Ver detalhes
+![Detalhes](docs/20251124-0143-03.4204490.gif)
+
 
 ## 🧪 Testes
 
-Execute os testes JUnit na pasta `test/`:
+Execute os testes JUnit com Maven:
 
-```bash
+```
 # Todos os testes
 mvn test
-
-# Ou através da IDE
 ```
+
+Ou execute os testes pela sua IDE.
 
 ## 👥 Equipe
 
-- Everton
-- Eloiza
-- Leslie
+- Everton — design da arquitetura MVC, implementação das telas e testes unitários.
+- Eloiza — implementação da persistência, parte do gerenciador e classes models filhas.
+- Leslie — implementação da classe midia e parte do gerenciador.
 
 ---
-
-© 2025 - Trabalho Final de POO
