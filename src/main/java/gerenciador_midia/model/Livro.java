@@ -1,10 +1,17 @@
 package gerenciador_midia.model;
 
+import gerenciador_midia.enums.LivroFormatoSuportado;
+
+/**
+ * Representa uma mídia do tipo Livro.
+ * Formatos suportados: PDF, EPUB
+ */
 public class Livro extends Midia {
+    
     private String autores;
 
-    public Livro(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String autores) {
-        super(local, tamanhoEmDisco, titulo, duracao, categoria);
+    public Livro(String local, String titulo, int duracao, String categoria, String autores) {
+        super(local, titulo, duracao, categoria);
         this.setAutores(autores);
     }
 
@@ -18,12 +25,24 @@ public class Livro extends Midia {
                 "\nLocal: " + getLocal();
     }
 
-    public String getAutores() {
+    @Override
+    protected boolean validarFormato(String extensao) {
+        try {
+            LivroFormatoSuportado.valueOf(extensao);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
+    public String getAutores() {
         return autores;
     }
 
     public void setAutores(String autores) {
-        this.autores = autores;
+        if (autores == null || autores.trim().isEmpty()) {
+            throw new IllegalArgumentException("Os autores não podem ser nulos ou vazios.");
+        }
+        this.autores = autores.trim();
     }
 }

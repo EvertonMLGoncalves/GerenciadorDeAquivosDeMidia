@@ -5,70 +5,212 @@ import gerenciador_midia.model.Livro;
 import gerenciador_midia.model.Midia;
 import gerenciador_midia.model.Musica;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Controlador principal do sistema de gerenciamento de mídias.
+ * Responsável por todas as operações de CRUD, filtragem, ordenação e persistência.
+ */
 public class GerenciadorMidia {
 
     private List<Midia> midias;
-    private final Path ARQUIVO = Paths.get("midias.tpoo");
+    private PersistenciaArquivo persistencia;
 
     public GerenciadorMidia() {
         this.midias = new ArrayList<>();
+        this.persistencia = new PersistenciaArquivo();
         carregarMidias();
     }
 
+    /**
+     * Inclui uma nova mídia no sistema.
+     * 
+     * @param midia Mídia a ser incluída
+     * @throws IllegalArgumentException se a mídia for nula ou já existir no local especificado
+     */
     public void incluirMidia(Midia midia) {
+        if (midia == null) {
+            throw new IllegalArgumentException("A mídia não pode ser nula.");
+        }
+        
+        // Verificar se já existe uma mídia com o mesmo local
+        for (Midia m : midias) {
+            if (m.getLocal().equals(midia.getLocal())) {
+                throw new IllegalArgumentException("Já existe uma mídia cadastrada neste local: " + midia.getLocal());
+            }
+        }
+        
         this.midias.add(midia);
-        carregarMidias();
     }
 
+    /**
+     * Remove uma mídia do sistema e deleta seu arquivo .tpoo.
+     * 
+     * @param midia Mídia a ser removida
+     * @throws IllegalArgumentException se a mídia for nula ou não for encontrada
+     */
+    public void removerMidia(Midia midia) {
+        if (midia == null) {
+            throw new IllegalArgumentException("A mídia não pode ser nula.");
+        }
+        
+        boolean removido = this.midias.removeIf(m -> m.getLocal().equals(midia.getLocal()));
+        
+        if (!removido) {
+            throw new IllegalArgumentException("Mídia não encontrada: " + midia.getLocal());
+        }
+        
+        try {
+            persistencia.deletarMidia(midia);
+        } catch (IOException e) {
+            System.err.println("Erro ao deletar arquivo .tpoo: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Retorna uma cópia da lista de mídias.
+     * 
+     * @return Lista com todas as mídias cadastradas
+     */
+    public List<Midia> getMidias() {
+        return new ArrayList<>(midias);
+    }
+
+    /**
+     * Edita os dados de uma mídia existente e atualiza seu arquivo .tpoo.
+     * 
+     * @param midiaAntiga Mídia a ser editada
+     * @param midiaNova Novos dados da mídia
+     * @throws IllegalArgumentException se alguma mídia for nula ou a mídia antiga não for encontrada
+     */
     public void editarMidia(Midia midiaAntiga, Midia midiaNova) {
+        if (midiaAntiga == null || midiaNova == null) {
+            throw new IllegalArgumentException("As mídias não podem ser nulas.");
+        }
+        
+        boolean encontrado = false;
         for (int i = 0; i < midias.size(); i++) {
             if (midias.get(i).getLocal().equals(midiaAntiga.getLocal())) {
                 midias.set(i, midiaNova);
+                encontrado = true;
                 break;
             }
         }
+        
+        if (!encontrado) {
+            throw new IllegalArgumentException("Mídia não encontrada: " + midiaAntiga.getLocal());
+        }
+        
+        try {
+            if (!midiaAntiga.getLocal().equals(midiaNova.getLocal())) {
+                persistencia.renomearArquivoMidia(midiaAntiga.getLocal(), midiaNova);
+            } else {
+                persistencia.salvarMidia(midiaNova);
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao atualizar arquivo .tpoo: " + e.getMessage());
+        }
     }
-    public void renomearMidia(String local, String novoTitulo) {
+
+    /**
+     * Renomeia o título e opcionalmente o local de uma mídia, atualizando seu arquivo .tpoo.
+     * 
+     * @param local Local atual da mídia
+     * @param novoTitulo Novo título da mídia
+     * @param novoLocal Novo local do arquivo (ou null para manter o mesmo)
+     * @throws IllegalArgumentException se o local ou título forem inválidos ou a mídia não for encontrada
+     */
+    public void renomearMidia(String local, String novoTitulo, String novoLocal) {
+        if (local == null || local.trim().isEmpty()) {
+            throw new IllegalArgumentException("O local não pode ser nulo ou vazio.");
+        }
+        if (novoTitulo == null || novoTitulo.trim().isEmpty()) {
+            throw new IllegalArgumentException("O novo título não pode ser nulo ou vazio.");
+        }
+        
+        boolean encontrado = false;
+        Midia midiaModificada = null;
         for (Midia m : midias) {
             if (m.getLocal().equals(local)) {
                 m.setTitulo(novoTitulo);
+                if (novoLocal != null && !novoLocal.trim().isEmpty()) {
+                    m.setLocal(novoLocal);
+                    m.atualizarTamanhoEmDisco();
+                }
+                midiaModificada = m;
+                encontrado = true;
                 break;
             }
         }
+        
+        if (!encontrado) {
+            throw new IllegalArgumentException("Mídia não encontrada no local: " + local);
+        }
+        
+        try {
+            if (novoLocal != null && !novoLocal.trim().isEmpty() && !local.equals(novoLocal)) {
+                persistencia.renomearArquivoMidia(local, midiaModificada);
+            } else {
+                persistencia.salvarMidia(midiaModificada);
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao atualizar arquivo .tpoo: " + e.getMessage());
+        }
     }
+
+    /**
+     * Move uma mídia para um novo local e atualiza seu arquivo .tpoo.
+     * 
+     * @param localAntigo Local atual da mídia
+     * @param localNovo Novo local da mídia
+     * @throws IllegalArgumentException se os locais forem inválidos, o novo local já estiver em uso ou a mídia não for encontrada
+     */
     public void moverMidia(String localAntigo, String localNovo) {
+        if (localAntigo == null || localAntigo.trim().isEmpty()) {
+            throw new IllegalArgumentException("O local antigo não pode ser nulo ou vazio.");
+        }
+        if (localNovo == null || localNovo.trim().isEmpty()) {
+            throw new IllegalArgumentException("O local novo não pode ser nulo ou vazio.");
+        }
+        
+        for (Midia m : midias) {
+            if (m.getLocal().equals(localNovo)) {
+                throw new IllegalArgumentException("Já existe uma mídia no local de destino: " + localNovo);
+            }
+        }
+        
+        boolean encontrado = false;
+        Midia midiaMovida = null;
         for (Midia m : midias) {
             if (m.getLocal().equals(localAntigo)) {
                 m.setLocal(localNovo);
+                m.atualizarTamanhoEmDisco();
+                midiaMovida = m;
+                encontrado = true;
                 break;
             }
         }
-    }
-    public void renomearArquivo(String localantigo, String novoTitulo) {
-        File arquivoAntigo = new File (localantigo);
-        File arquivoNovo = new File(novoTitulo);
-
-        for (Midia m : midias) {
-            if (m.getLocal().equals(localantigo)) {
-                m.setTitulo(novoTitulo);
-                break;
-            }
+        
+        if (!encontrado) {
+            throw new IllegalArgumentException("Mídia não encontrada no local: " + localAntigo);
+        }
+        
+        try {
+            persistencia.renomearArquivoMidia(localAntigo, midiaMovida);
+        } catch (IOException e) {
+            System.err.println("Erro ao atualizar arquivo .tpoo: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista mídias de uma categoria específica.
+     * 
+     * @param categoria Categoria a ser filtrada
+     * @return Lista de mídias da categoria especificada
+     */
     public List<Midia> listarPorCategoria(String categoria) {
         if (categoria == null) return new ArrayList<>();
 
@@ -81,6 +223,11 @@ public class GerenciadorMidia {
         return resultado;
     }
 
+    /**
+     * Retorna lista de mídias ordenadas por título.
+     * 
+     * @return Lista ordenada alfabeticamente por título
+     */
     public List<Midia> ordenarPorTitulo() {
         List<Midia> copia = new ArrayList<>(midias);
         copia.sort(Comparator.comparing(
@@ -90,91 +237,67 @@ public class GerenciadorMidia {
         return copia;
     }
 
+    /**
+     * Retorna lista de mídias ordenadas por duração.
+     * 
+     * @return Lista ordenada por duração crescente
+     */
     public List<Midia> ordenarPorDuracao() {
         List<Midia> copia = new ArrayList<>(midias);
         copia.sort(Comparator.comparingInt(m -> m.getDuracao()));
         return copia;
     }
 
-    public List<Midia> filtrarMidias(String formato, String categoria) {
+    /**
+     * Filtra mídias por tipo e/ou categoria.
+     * 
+     * @param tipo Tipo de mídia (Filme, Música, Livro) ou null para todos
+     * @param categoria Categoria da mídia ou null para todas
+     * @return Lista de mídias que atendem aos critérios
+     */
+    public List<Midia> filtrarMidias(String tipo, String categoria) {
         List<Midia> resultado = new ArrayList<>();
         for (Midia m : midias) {
-            boolean okFormato = (formato == null || formato.isEmpty()) ||
-                    (m.getFormato() != null && m.getFormato().equalsIgnoreCase(formato));
+            boolean okTipo = (tipo == null || tipo.isEmpty());
+            if (!okTipo) {
+                if (tipo.equalsIgnoreCase("filme") && m instanceof Filme) {
+                    okTipo = true;
+                } else if (tipo.equalsIgnoreCase("música") && m instanceof Musica) {
+                    okTipo = true;
+                } else if (tipo.equalsIgnoreCase("livro") && m instanceof Livro) {
+                    okTipo = true;
+                }
+            }
+            
             boolean okCategoria = (categoria == null || categoria.isEmpty()) ||
                     (m.getCategoria() != null && m.getCategoria().equalsIgnoreCase(categoria));
 
-            if (okFormato && okCategoria) {
+            if (okTipo && okCategoria) {
                 resultado.add(m);
             }
         }
         return resultado;
     }
 
+    /**
+     * Carrega todas as mídias dos arquivos .tpoo individuais.
+     */
     public void carregarMidias() {
         midias.clear();
-        if (!Files.exists(ARQUIVO)) {
-            return;
-        }
-
-        try (BufferedReader reader = Files.newBufferedReader(ARQUIVO, StandardCharsets.UTF_8)) {
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                linha = linha.trim();
-                if (linha.isEmpty()) continue;
-
-                String[] partes = linha.split(";", -1);
-                String titulo = partes.length > 0 ? partes[0] : "";
-                String formato = partes.length > 1 ? partes[1] : "";
-                String categoria = partes.length > 2 ? partes[2] : "";
-                int duracao = 0;
-
-                if (partes.length > 3) {
-                    try {
-                        duracao = Integer.parseInt(partes[3].trim());
-                    } catch (NumberFormatException e) {
-                        duracao = 0;
-                    }
-                }
-
-                Midia m;
-                if (formato.equalsIgnoreCase("filme")) {
-                    m = new Filme("", 0, titulo, duracao, categoria, formato);
-                } else if (formato.equalsIgnoreCase("livro")) m = new Livro("", 0, titulo, duracao, categoria, formato);
-                else if (formato.equalsIgnoreCase("musica")) {
-                    m = new Musica("", 0, titulo, duracao, categoria, formato);
-                } else {
-                    m = new Filme("", 0, titulo, duracao, categoria, formato);
-                }
-
-                midias.add(m);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        midias.addAll(persistencia.carregarTodasMidias());
     }
 
+    /**
+     * Salva todas as mídias em arquivos .tpoo individuais.
+     */
     public void salvarMidias() {
-        try (BufferedWriter writer = Files.newBufferedWriter(ARQUIVO, StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-
+        try {
             for (Midia m : midias) {
-                String linha = String.join(";",
-                        safe(m.getTitulo()),
-                        safe(m.getFormato()),
-                        safe(m.getCategoria()),
-                        String.valueOf(m.getDuracao())
-                );
-                writer.write(linha);
-                writer.newLine();
+                persistencia.salvarMidia(m);
             }
-
         } catch (IOException e) {
+            System.err.println("Erro ao salvar mídias: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    private String safe(String s) {
-        return (s == null) ? "" : s.replace(";", "");
     }
 }
