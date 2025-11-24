@@ -1,20 +1,15 @@
 package gerenciador_midia.model;
 
+import gerenciador_midia.enums.MusicaFormatoSuportado;
+
 public class Musica extends Midia {
     private String artista;
 
-    public Musica(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String artista) {
-        super(local, tamanhoEmDisco, titulo, duracao, categoria);
+    public Musica(String local, String titulo, int duracao, String categoria, String artista) {
+        super(local, titulo, duracao, categoria);
         this.setArtista(artista);
     }
 
-    public String getArtista() {
-        return artista;
-    }
-
-    public void setArtista(String artista) {
-        this.artista = artista;
-    }
     @Override
     public String exibirDetalhes() {
         return "Musica: " + getTitulo() +
@@ -24,6 +19,27 @@ public class Musica extends Midia {
                 "\nTamanho: " + getTamanhoEmDisco() + " MB" +
                 "\nLocal: " + getLocal();
     }
+
+    @Override
+    protected boolean validarFormato(String extensao) {
+        try {
+            MusicaFormatoSuportado.valueOf(extensao);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public String getArtista() {
+        return artista;
+    }
+
+    public void setArtista(String artista) {
+        this.artista = artista;
+    }
 }
+
+
+
 
 

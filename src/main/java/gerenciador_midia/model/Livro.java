@@ -1,10 +1,12 @@
 package gerenciador_midia.model;
 
+import gerenciador_midia.enums.LivroFormatoSuportado;
+
 public class Livro extends Midia {
     private String autores;
 
-    public Livro(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String autores) {
-        super(local, tamanhoEmDisco, titulo, duracao, categoria);
+    public Livro(String local, String titulo, int duracao, String categoria, String autores) {
+        super(local, titulo, duracao, categoria);
         this.setAutores(autores);
     }
 
@@ -16,6 +18,16 @@ public class Livro extends Midia {
                 "\nCategoria: " + getCategoria() +
                 "\nTamanho: " + getTamanhoEmDisco() + " MB" +
                 "\nLocal: " + getLocal();
+    }
+
+    @Override
+    protected boolean validarFormato(String extensao) {
+        try {
+            LivroFormatoSuportado.valueOf(extensao);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public String getAutores() {

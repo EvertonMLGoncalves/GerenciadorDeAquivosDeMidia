@@ -41,6 +41,7 @@ public class GerenciadorMidia {
             }
         }
     }
+
     public void renomearMidia(String local, String novoTitulo) {
         for (Midia m : midias) {
             if (m.getLocal().equals(local)) {
@@ -49,6 +50,7 @@ public class GerenciadorMidia {
             }
         }
     }
+
     public void moverMidia(String localAntigo, String localNovo) {
         for (Midia m : midias) {
             if (m.getLocal().equals(localAntigo)) {
@@ -57,8 +59,9 @@ public class GerenciadorMidia {
             }
         }
     }
+
     public void renomearArquivo(String localantigo, String novoTitulo) {
-        File arquivoAntigo = new File (localantigo);
+        File arquivoAntigo = new File(localantigo);
         File arquivoNovo = new File(novoTitulo);
 
         for (Midia m : midias) {
@@ -139,12 +142,12 @@ public class GerenciadorMidia {
 
                 Midia m;
                 if (formato.equalsIgnoreCase("filme")) {
-                    m = new Filme("", 0, titulo, duracao, categoria, formato);
-                } else if (formato.equalsIgnoreCase("livro")) m = new Livro("", 0, titulo, duracao, categoria, formato);
+                    m = new Filme("", titulo, duracao, categoria, formato);
+                } else if (formato.equalsIgnoreCase("livro")) m = new Livro("", titulo, duracao, categoria, formato);
                 else if (formato.equalsIgnoreCase("musica")) {
-                    m = new Musica("", 0, titulo, duracao, categoria, formato);
+                    m = new Musica("", titulo, duracao, categoria, formato);
                 } else {
-                    m = new Filme("", 0, titulo, duracao, categoria, formato);
+                    m = new Filme("", titulo, duracao, categoria, formato);
                 }
 
                 midias.add(m);

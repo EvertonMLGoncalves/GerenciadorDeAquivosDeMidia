@@ -1,11 +1,13 @@
 package gerenciador_midia.model;
 
+import gerenciador_midia.enums.FilmeFormatoSuportado;
+
 public class Filme extends Midia {
 
     private String idioma;
 
-    public Filme(String local, long tamanhoEmDisco, String titulo, int duracao, String categoria, String idioma) {
-        super(local, tamanhoEmDisco, titulo, duracao, categoria);
+    public Filme(String local, String titulo, int duracao, String categoria, String idioma) {
+        super(local, titulo, duracao, categoria);
         this.setIdioma(idioma);
     }
 
@@ -17,6 +19,16 @@ public class Filme extends Midia {
                 "\nCategoria: " + getCategoria() +
                 "\nTamanho: " + getTamanhoEmDisco() + " MB" +
                 "\nLocal: " + getLocal();
+    }
+
+    @Override
+    protected boolean validarFormato(String extensao) {
+        try {
+            FilmeFormatoSuportado.valueOf(extensao);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public String getIdioma() {
